@@ -10,29 +10,34 @@ struct ASCIIString<Str: StringProtocol> {
 	let base: Str
 	let asciiStartIndex: Int
 
-	init(_ base: Str) {
+	private init(_ base: Str, asciiStartIndex: Int) {
 		self.base = base
+		self.asciiStartIndex = asciiStartIndex
+	}
 
-		if let ss = base as? Substring {
-			let rootString = ss.base
-			var itInd = rootString.startIndex
-			self.asciiStartIndex = (0...).first { _ in
-				if itInd == base.startIndex {
-					return true
-				} else {
-					itInd = rootString.index(after: itInd)
-					return false
-				}
-			}!
-		} else {
-			self.asciiStartIndex = 0
-		}
+	init(_ base: Str) where Str == String {
+		self.base = base
+		self.asciiStartIndex = 0
+	}
+
+	init(_ base: Str) where Str == Substring {
+		self.base = base
+		let rootString = base.base
+		var itInd = rootString.startIndex
+		self.asciiStartIndex = (0...).first { _ in
+			if itInd == base.startIndex {
+				return true
+			} else {
+				itInd = rootString.index(after: itInd)
+				return false
+			}
+		}!
 	}
 
 	func firstSlice(matching predicate: (Character) -> Bool) -> Slice? {
-		var startIndices: (ascii: Int, raw: String.Index)?
+		var startIndices: IndexPair?
 
-		func slice(relativeTo starts: (ascii: Int, raw: String.Index), asciiEnd: Int, rawEnd: String.Index) -> Slice {
+		func slice(relativeTo starts: IndexPair, asciiEnd: Int, rawEnd: String.Index) -> Slice {
 			Slice(base: self,
 				  asciiRange: (self.asciiStartIndex + starts.ascii)..<(self.asciiStartIndex + asciiEnd),
 				  rawRange: starts.raw..<rawEnd)
@@ -43,7 +48,7 @@ struct ASCIIString<Str: StringProtocol> {
 
 			if predicate(char) {
 				if startIndices == nil {
-					startIndices = (asciiI, rawI)
+					startIndices = .init(ascii: asciiI, raw: rawI)
 				}
 			} else {
 				if let startIndices {
@@ -64,19 +69,27 @@ struct ASCIIString<Str: StringProtocol> {
 	}
 
 	func allSlices(matching predicate: (Character) -> Bool) -> Array<ASCIIString<Str.SubSequence>.Slice> {
-		var nextStartIndex: Optional = self.base.startIndex
+		var nextStartIndices = IndexPair(ascii: self.asciiStartIndex, raw: self.base.startIndex)
 
 		var out = Array<ASCIIString<Str.SubSequence>.Slice>()
-		while let nsi = nextStartIndex {
-			let remainderString = ASCIIString<Str.SubSequence>(self.base[nsi...])
+		while true {
+			let remainderString = ASCIIString<Str.SubSequence>(self.base[nextStartIndices.raw...],
+															   asciiStartIndex: nextStartIndices.ascii)
 			guard let slice = remainderString.firstSlice(matching: predicate) else { break }
 
-			nextStartIndex = slice.rawRange.upperBound
+			nextStartIndices = IndexPair(ascii: slice.asciiRange.upperBound, raw: slice.rawRange.upperBound)
 
 			out.append(consume slice)
 		}
 
 		return out
+	}
+}
+
+private extension ASCIIString {
+	struct IndexPair {
+		let ascii: Int
+		let raw: Str.Index
 	}
 }
 
