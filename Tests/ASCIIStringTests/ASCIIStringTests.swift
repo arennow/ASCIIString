@@ -41,4 +41,10 @@ final class ASCIIStringTests: XCTestCase {
 		XCTAssertEqual(slice?.asciiRange, 3..<6)
 		XCTAssertEqual(slice?.rawRange, src.index(src.startIndex, offsetBy: 3)..<src.endIndex)
 	}
+
+	func testAllSlices() {
+		let slices = ASCIIString("abc123def456ghi").allSlices(matching: \.isNumber)
+		XCTAssertEqual(slices.map(\.substring), ["123", "456"])
+		XCTAssertEqual(slices.map(\.asciiRange), [3..<6, 9..<12])
+	}
 }

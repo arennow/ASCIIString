@@ -62,6 +62,22 @@ struct ASCIIString<Str: StringProtocol> {
 			return nil
 		}
 	}
+
+	func allSlices(matching predicate: (Character) -> Bool) -> Array<ASCIIString<Str.SubSequence>.Slice> {
+		var nextStartIndex: Optional = self.base.startIndex
+
+		var out = Array<ASCIIString<Str.SubSequence>.Slice>()
+		while let nsi = nextStartIndex {
+			let remainderString = ASCIIString<Str.SubSequence>(self.base[nsi...])
+			guard let slice = remainderString.firstSlice(matching: predicate) else { break }
+
+			nextStartIndex = slice.rawRange.upperBound
+
+			out.append(consume slice)
+		}
+
+		return out
+	}
 }
 
 extension ASCIIString.Slice: CustomDebugStringConvertible {
