@@ -2,11 +2,33 @@
 import XCTest
 
 final class ASCIIStringTests: XCTestCase {
-	func testExample() throws {
-		// XCTest Documentation
-		// https://developer.apple.com/documentation/xctest
+	func testFirstSlice_single() {
+		let slice = ASCIIString("a6bc").firstSlice(matching: \.isNumber)
+		XCTAssertEqual(slice?.substring, "6")
+		XCTAssertEqual(slice?.asciiRange, 1..<2)
+	}
 
-		// Defining Test Cases and Test Methods
-		// https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
+	func testFirstSlice_ignoresOthers() {
+		let slice = ASCIIString("123abc456").firstSlice(matching: \.isNumber)
+		XCTAssertEqual(slice?.substring, "123")
+		XCTAssertEqual(slice?.asciiRange, 0..<3)
+	}
+
+	func testFirstSlice_beginning() {
+		let slice = ASCIIString("123abc").firstSlice(matching: \.isNumber)
+		XCTAssertEqual(slice?.substring, "123")
+		XCTAssertEqual(slice?.asciiRange, 0..<3)
+	}
+
+	func testFirstSlice_middle() {
+		let slice = ASCIIString("a123bc").firstSlice(matching: \.isNumber)
+		XCTAssertEqual(slice?.substring, "123")
+		XCTAssertEqual(slice?.asciiRange, 1..<4)
+	}
+
+	func testFirstSlice_end() {
+		let slice = ASCIIString("abc123").firstSlice(matching: \.isNumber)
+		XCTAssertEqual(slice?.substring, "123")
+		XCTAssertEqual(slice?.asciiRange, 3..<6)
 	}
 }
