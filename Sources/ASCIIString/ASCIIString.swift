@@ -1,13 +1,13 @@
-struct ASCIIString<Str: StringProtocol> {
-	struct Slice {
-		let base: ASCIIString
+public struct ASCIIString<Str: StringProtocol> {
+	public struct Slice {
+		public let base: ASCIIString
 
-		let asciiRange: Range<Int>
-		let rawRange: Range<String.Index>
-		var substring: Str.SubSequence { self.base.base[self.rawRange] }
+		public let asciiRange: Range<Int>
+		public let rawRange: Range<String.Index>
+		public var substring: Str.SubSequence { self.base.base[self.rawRange] }
 	}
 
-	let base: Str
+	public let base: Str
 	let asciiStartIndex: Int
 
 	private init(_ base: Str, asciiStartIndex: Int) {
@@ -15,12 +15,12 @@ struct ASCIIString<Str: StringProtocol> {
 		self.asciiStartIndex = asciiStartIndex
 	}
 
-	init(_ base: Str) where Str == String {
+	public init(_ base: Str) where Str == String {
 		self.base = base
 		self.asciiStartIndex = 0
 	}
 
-	init(_ base: Str) where Str == Substring {
+	public init(_ base: Str) where Str == Substring {
 		self.base = base
 		let rootString = base.base
 		var itInd = rootString.startIndex
@@ -34,7 +34,7 @@ struct ASCIIString<Str: StringProtocol> {
 		}!
 	}
 
-	func firstSlice(matching predicate: (Character) -> Bool) -> Slice? {
+	public func firstSlice(matching predicate: (Character) -> Bool) -> Slice? {
 		var startIndices: IndexPair?
 
 		func slice(relativeTo starts: IndexPair, asciiEnd: Int, rawEnd: String.Index) -> Slice {
@@ -68,7 +68,7 @@ struct ASCIIString<Str: StringProtocol> {
 		}
 	}
 
-	func allSlices(matching predicate: (Character) -> Bool) -> Array<ASCIIString<Str.SubSequence>.Slice> {
+	public func allSlices(matching predicate: (Character) -> Bool) -> Array<ASCIIString<Str.SubSequence>.Slice> {
 		var nextStartIndices = IndexPair(ascii: self.asciiStartIndex, raw: self.base.startIndex)
 
 		var out = Array<ASCIIString<Str.SubSequence>.Slice>()
@@ -94,7 +94,7 @@ private extension ASCIIString {
 }
 
 extension ASCIIString.Slice: CustomDebugStringConvertible {
-	var debugDescription: String {
+	public var debugDescription: String {
 		#""\#(self.substring)" (\#(self.asciiRange))"#
 	}
 }
