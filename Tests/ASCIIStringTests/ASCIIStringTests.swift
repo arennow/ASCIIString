@@ -27,8 +27,18 @@ final class ASCIIStringTests: XCTestCase {
 	}
 
 	func testFirstSlice_end() {
-		let slice = ASCIIString("abc123").firstSlice(matching: \.isNumber)
+		let src = "abc123"
+		let slice = ASCIIString(src).firstSlice(matching: \.isNumber)
 		XCTAssertEqual(slice?.substring, "123")
 		XCTAssertEqual(slice?.asciiRange, 3..<6)
+		XCTAssertEqual(slice?.rawRange, src.index(src.startIndex, offsetBy: 3)..<src.endIndex)
+	}
+
+	func testFirstSlice_substring() {
+		let src = "abc123"
+		let slice = ASCIIString(src.dropFirst()).firstSlice(matching: \.isNumber)
+		XCTAssertEqual(slice?.substring, "123")
+		XCTAssertEqual(slice?.asciiRange, 3..<6)
+		XCTAssertEqual(slice?.rawRange, src.index(src.startIndex, offsetBy: 3)..<src.endIndex)
 	}
 }
